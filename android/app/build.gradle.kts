@@ -48,6 +48,7 @@ android {
 }
 
 dependencies {
+    implementation("androidx.graphics:graphics-shapes:1.1.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -89,5 +90,4 @@ dependencies {
     androidTestImplementation(libs.androidx.room.testing)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.turbine)
-    debugImplementation(libs.androidx.ui.test.manifest)
 }

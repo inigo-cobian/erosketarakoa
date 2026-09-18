@@ -1,5 +1,6 @@
 package com.erosketarakoa.app.ui.lists
 
+import android.graphics.drawable.shapes.RoundRectShape
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,9 +34,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.graphics.shapes.CornerRounding
+import androidx.graphics.shapes.RoundedPolygon
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.erosketarakoa.app.data.local.ListEntity
+import com.erosketarakoa.app.ui.theme.RoundedHexagonShape
 
 const val LISTS_SCREEN_TAG = "lists_screen"
 const val ADD_LIST_FAB_TAG = "add_list_fab"
@@ -60,8 +64,9 @@ fun ListsScreen(
             FloatingActionButton(
                 onClick = { showCreate = true },
                 modifier = Modifier.testTag(ADD_LIST_FAB_TAG),
+                shape = RoundedHexagonShape(cornerRadius = 8.dp),
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add list")
+                Icon(Icons.Filled.Add, contentDescription = "Add list")
             }
         },
     ) { padding ->
