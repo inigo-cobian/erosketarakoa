@@ -7,7 +7,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [ListEntity::class, ItemEntity::class],
-    version = 3,
+    version = 4,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -20,6 +20,24 @@ abstract class AppDatabase : RoomDatabase() {
         val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE items ADD COLUMN icon TEXT NOT NULL DEFAULT '1F3FA'")
+            }
+        }
+
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE items ADD COLUMN position INTEGER NOT NULL DEFAULT 0")
+                // Seed positions per list from the previous default sort so existing lists keep order.
+                db.execSQL(
+                    """
+                    UPDATE items SET position = (
+                        SELECT COUNT(*) FROM items AS o
+                        WHERE o.listId = items.listId
+                        AND (o.bought < items.bought
+                             OR (o.bought = items.bought AND o.name COLLATE NOCASE < items.name COLLATE NOCASE)
+                             OR (o.bought = items.bought AND o.name COLLATE NOCASE = items.name COLLATE NOCASE AND o.id < items.id))
+                    )
+                    """.trimIndent(),
+                )
             }
         }
     }

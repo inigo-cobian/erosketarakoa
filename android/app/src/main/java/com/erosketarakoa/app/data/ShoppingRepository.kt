@@ -61,6 +61,7 @@ class ShoppingRepository @Inject constructor(
         icon: String = "1F3FA",
     ): String {
         val id = clock.newId()
+        val nextPosition = (itemDao.maxPosition(listId) ?: -1) + 1
         itemDao.upsert(
             ItemEntity(
                 id = id,
@@ -71,6 +72,7 @@ class ShoppingRepository @Inject constructor(
                 notes = notes?.trim()?.ifBlank { null },
                 bought = false,
                 icon = icon.ifBlank { "1F3FA" },
+                position = nextPosition,
                 updatedAt = clock.nowMillis(),
                 isDeleted = false,
             ),
@@ -103,5 +105,11 @@ class ShoppingRepository @Inject constructor(
 
     suspend fun deleteItem(id: String) {
         itemDao.softDelete(id, clock.nowMillis())
+    }
+
+    /** Persist a new manual order. [orderedIds] is the full list top-to-bottom. */
+    suspend fun reorderItems(orderedIds: List<String>) {
+        val now = clock.nowMillis()
+        orderedIds.forEachIndexed { index, id -> itemDao.setPosition(id, index, now) }
     }
 }

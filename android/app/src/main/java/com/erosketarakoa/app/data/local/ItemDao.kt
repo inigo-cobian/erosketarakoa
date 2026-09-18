@@ -11,8 +11,14 @@ import kotlinx.coroutines.flow.Flow
 interface ItemDao {
 
     /** Active (not soft-deleted) items for a list, reactive. */
-    @Query("SELECT * FROM items WHERE listId = :listId AND isDeleted = 0 ORDER BY bought ASC, name COLLATE NOCASE ASC")
+    @Query("SELECT * FROM items WHERE listId = :listId AND isDeleted = 0 ORDER BY position ASC")
     fun observeActiveItems(listId: String): Flow<List<ItemEntity>>
+
+    @Query("SELECT MAX(position) FROM items WHERE listId = :listId AND isDeleted = 0")
+    suspend fun maxPosition(listId: String): Int?
+
+    @Query("UPDATE items SET position = :position, updatedAt = :updatedAt WHERE id = :id")
+    suspend fun setPosition(id: String, position: Int, updatedAt: Long)
 
     @Query("SELECT * FROM items WHERE id = :id")
     suspend fun getById(id: String): ItemEntity?

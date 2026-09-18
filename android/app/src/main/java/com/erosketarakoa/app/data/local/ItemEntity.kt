@@ -23,6 +23,8 @@ data class ItemEntity(
     val bought: Boolean = false,
     /** OpenMoji hexcode (filename stem), e.g. "1F345". Required; defaults to amphora. */
     val icon: String = "1F3FA",
+    /** Manual sort order within the list; lower shows first. */
+    val position: Int = 0,
     val updatedAt: Long = 0,
     val isDeleted: Boolean = false,
 )

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -17,6 +18,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -30,6 +32,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -38,6 +42,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.erosketarakoa.app.data.local.ItemEntity
 import com.erosketarakoa.app.ui.icon.OpenMojiIcon
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 const val DETAIL_SCREEN_TAG = "detail_screen"
 const val ADD_ITEM_FAB_TAG = "add_item_fab"
@@ -82,15 +88,28 @@ fun ListDetailScreen(
             if (!state.isLoading && state.items.isEmpty()) {
                 EmptyItems()
             } else {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                val haptic = LocalHapticFeedback.current
+                val lazyListState = rememberLazyListState()
+                val reorderState = rememberReorderableLazyListState(lazyListState) { from, to ->
+                    viewModel.moveItem(from.index, to.index)
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                }
+                LazyColumn(state = lazyListState, modifier = Modifier.fillMaxSize()) {
                     items(state.items, key = { it.id }) { item ->
-                        ItemRow(
-                            item = item,
-                            onToggle = { viewModel.toggleBought(item) },
-                            onEdit = { editing = item },
-                            onDelete = { viewModel.deleteItem(item.id) },
-                        )
-                        HorizontalDivider()
+                        ReorderableItem(reorderState, key = item.id) { isDragging ->
+                            Surface(tonalElevation = if (isDragging) 4.dp else 0.dp) {
+                                ItemRow(
+                                    item = item,
+                                    onToggle = { viewModel.toggleBought(item) },
+                                    onEdit = { editing = item },
+                                    onDelete = { viewModel.deleteItem(item.id) },
+                                    dragModifier = Modifier.longPressDraggableHandle(
+                                        onDragStopped = { viewModel.commitReorder() },
+                                    ),
+                                )
+                            }
+                            HorizontalDivider()
+                        }
                     }
                 }
             }
@@ -128,6 +147,7 @@ private fun ItemRow(
     onToggle: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
+    dragModifier: Modifier = Modifier,
 ) {
     val subtitle = buildString {
         if (item.quantity > 1) append("x${item.quantity}")
@@ -159,7 +179,7 @@ private fun ItemRow(
                 Icon(Icons.Default.Delete, contentDescription = "Delete item")
             }
         },
-        modifier = Modifier.clickable { onEdit() },
+        modifier = dragModifier.clickable { onEdit() },
     )
 }
 
