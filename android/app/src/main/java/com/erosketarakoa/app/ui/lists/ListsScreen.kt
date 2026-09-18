@@ -30,9 +30,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -72,9 +74,12 @@ fun ListsScreen(
             )
         },
         floatingActionButton = {
+            val rotation by animateFloatAsState(if (showCreate) 180f else 0f, label = "addRotation")
             FloatingActionButton(
                 onClick = { showCreate = true },
-                modifier = Modifier.testTag(ADD_LIST_FAB_TAG),
+                modifier = Modifier
+                    .testTag(ADD_LIST_FAB_TAG)
+                    .rotate(rotation),
                 shape = RoundedHexagonShape(cornerRadius = 8.dp),
             ) {
                 Icon(Icons.Filled.Add, contentDescription = "Add list")

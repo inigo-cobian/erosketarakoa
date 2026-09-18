@@ -1,5 +1,6 @@
 package com.erosketarakoa.app.ui.detail
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.testTag
@@ -43,6 +45,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.erosketarakoa.app.data.local.ItemEntity
 import com.erosketarakoa.app.ui.icon.OpenMojiIcon
+import com.erosketarakoa.app.ui.theme.RoundedHexagonShape
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
@@ -72,9 +75,13 @@ fun ListDetailScreen(
             )
         },
         floatingActionButton = {
+            val rotation by animateFloatAsState(if (showAdd) 180f else 0f, label = "addRotation")
             FloatingActionButton(
                 onClick = { showAdd = true },
-                modifier = Modifier.testTag(ADD_ITEM_FAB_TAG),
+                modifier = Modifier
+                    .testTag(ADD_ITEM_FAB_TAG)
+                    .rotate(rotation),
+                shape = RoundedHexagonShape(cornerRadius = 8.dp),
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add item")
             }
