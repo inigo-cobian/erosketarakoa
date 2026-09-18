@@ -14,7 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Checkbox
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -162,10 +162,7 @@ private fun ItemRow(
     }
     ListItem(
         leadingContent = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = item.bought, onCheckedChange = { onToggle() })
-                OpenMojiIcon(hexcode = item.icon)
-            }
+            OpenMojiIcon(hexcode = item.icon)
         },
         headlineContent = {
             Text(
@@ -175,11 +172,16 @@ private fun ItemRow(
         },
         supportingContent = { if (subtitle.isNotBlank()) Text(subtitle) },
         trailingContent = {
-            IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete item")
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onEdit) {
+                    Icon(Icons.Default.Edit, contentDescription = "Edit item")
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(Icons.Default.Delete, contentDescription = "Delete item")
+                }
             }
         },
-        modifier = dragModifier.clickable { onEdit() },
+        modifier = dragModifier.clickable { onToggle() },
     )
 }
 
