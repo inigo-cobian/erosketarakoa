@@ -91,4 +91,8 @@ class ListDetailViewModel @Inject constructor(
     fun deleteItem(id: String) {
         viewModelScope.launch { repository.deleteItem(id) }
     }
+
+    fun restoreItem(item: ItemEntity) {
+        viewModelScope.launch { repository.restoreItem(item) }
+    }
 }

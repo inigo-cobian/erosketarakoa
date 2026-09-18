@@ -107,6 +107,11 @@ class ShoppingRepository @Inject constructor(
         itemDao.softDelete(id, clock.nowMillis())
     }
 
+    /** Un-delete an item, restoring it as it was. */
+    suspend fun restoreItem(item: ItemEntity) {
+        itemDao.upsert(item.copy(isDeleted = false, updatedAt = clock.nowMillis()))
+    }
+
     /** Persist a new manual order. [orderedIds] is the full list top-to-bottom. */
     suspend fun reorderItems(orderedIds: List<String>) {
         val now = clock.nowMillis()
