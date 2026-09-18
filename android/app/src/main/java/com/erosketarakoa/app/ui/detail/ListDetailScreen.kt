@@ -32,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.testTag
@@ -181,7 +182,9 @@ private fun ItemRow(
                 }
             }
         },
-        modifier = dragModifier.clickable { onToggle() },
+        modifier = dragModifier
+            .clickable { onToggle() }
+            .alpha(if (item.bought) 0.5f else 1f),
     )
 }
 
