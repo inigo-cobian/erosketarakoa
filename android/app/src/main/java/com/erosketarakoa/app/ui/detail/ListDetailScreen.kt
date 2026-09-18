@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -36,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.erosketarakoa.app.data.local.ItemEntity
+import com.erosketarakoa.app.ui.icon.OpenMojiIcon
 
 const val DETAIL_SCREEN_TAG = "detail_screen"
 const val ADD_ITEM_FAB_TAG = "add_item_fab"
@@ -100,7 +102,7 @@ fun ListDetailScreen(
             title = "Add item",
             existing = null,
             onConfirm = { form ->
-                viewModel.addItem(form.name, form.quantity, form.category, form.notes)
+                viewModel.addItem(form.name, form.quantity, form.category, form.notes, form.icon)
                 showAdd = false
             },
             onDismiss = { showAdd = false },
@@ -112,7 +114,7 @@ fun ListDetailScreen(
             title = "Edit item",
             existing = item,
             onConfirm = { form ->
-                viewModel.updateItem(item.id, form.name, form.quantity, form.category, form.notes)
+                viewModel.updateItem(item.id, form.name, form.quantity, form.category, form.notes, form.icon)
                 editing = null
             },
             onDismiss = { editing = null },
@@ -140,7 +142,10 @@ private fun ItemRow(
     }
     ListItem(
         leadingContent = {
-            Checkbox(checked = item.bought, onCheckedChange = { onToggle() })
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(checked = item.bought, onCheckedChange = { onToggle() })
+                OpenMojiIcon(hexcode = item.icon)
+            }
         },
         headlineContent = {
             Text(

@@ -58,6 +58,7 @@ class ShoppingRepository @Inject constructor(
         quantity: Int = 1,
         category: String? = null,
         notes: String? = null,
+        icon: String = "1F3FA",
     ): String {
         val id = clock.newId()
         itemDao.upsert(
@@ -69,6 +70,7 @@ class ShoppingRepository @Inject constructor(
                 category = category?.trim()?.ifBlank { null },
                 notes = notes?.trim()?.ifBlank { null },
                 bought = false,
+                icon = icon.ifBlank { "1F3FA" },
                 updatedAt = clock.nowMillis(),
                 isDeleted = false,
             ),
@@ -82,6 +84,7 @@ class ShoppingRepository @Inject constructor(
         quantity: Int,
         category: String?,
         notes: String?,
+        icon: String = "1F3FA",
     ) {
         itemDao.updateFields(
             id = id,
@@ -89,6 +92,7 @@ class ShoppingRepository @Inject constructor(
             quantity = quantity.coerceAtLeast(1),
             category = category?.trim()?.ifBlank { null },
             notes = notes?.trim()?.ifBlank { null },
+            icon = icon.ifBlank { "1F3FA" },
             updatedAt = clock.nowMillis(),
         )
     }

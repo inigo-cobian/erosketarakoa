@@ -19,6 +19,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.unit.dp
 import com.erosketarakoa.app.data.local.ItemEntity
+import com.erosketarakoa.app.ui.icon.DEFAULT_ICON
+import com.erosketarakoa.app.ui.icon.IconPickerGrid
 
 const val ITEM_NAME_FIELD_TAG = "item_name_field"
 const val ITEM_QTY_FIELD_TAG = "item_qty_field"
@@ -29,6 +31,7 @@ data class ItemFormValues(
     val quantity: Int,
     val category: String?,
     val notes: String?,
+    val icon: String,
 )
 
 @Composable
@@ -42,6 +45,7 @@ fun ItemEditorDialog(
     var quantity by remember { mutableStateOf((existing?.quantity ?: 1).toString()) }
     var category by remember { mutableStateOf(existing?.category ?: "") }
     var notes by remember { mutableStateOf(existing?.notes ?: "") }
+    var icon by remember { mutableStateOf(existing?.icon ?: DEFAULT_ICON) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -82,6 +86,12 @@ fun ItemEditorDialog(
                         .fillMaxWidth()
                         .padding(bottom = 4.dp),
                 )
+                Text("Icon")
+                IconPickerGrid(
+                    selected = icon,
+                    onSelect = { icon = it },
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         },
         confirmButton = {
@@ -95,6 +105,7 @@ fun ItemEditorDialog(
                             quantity = quantity.toIntOrNull() ?: 1,
                             category = category.ifBlank { null },
                             notes = notes.ifBlank { null },
+                            icon = icon,
                         ),
                     )
                 },

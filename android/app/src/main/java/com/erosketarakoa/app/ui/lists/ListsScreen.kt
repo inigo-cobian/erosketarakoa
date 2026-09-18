@@ -13,7 +13,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,11 +46,13 @@ import com.erosketarakoa.app.ui.theme.RoundedHexagonShape
 const val LISTS_SCREEN_TAG = "lists_screen"
 const val ADD_LIST_FAB_TAG = "add_list_fab"
 const val LIST_NAME_FIELD_TAG = "list_name_field"
+const val ABOUT_ACTION_TAG = "about_action"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListsScreen(
     onOpenList: (String) -> Unit,
+    onOpenAbout: () -> Unit = {},
     viewModel: ListsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -58,7 +62,14 @@ fun ListsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Shopping lists") })
+            TopAppBar(
+                title = { Text("Shopping lists") },
+                actions = {
+                    IconButton(onClick = onOpenAbout, modifier = Modifier.testTag(ABOUT_ACTION_TAG)) {
+                        Icon(Icons.Default.Info, contentDescription = "About")
+                    }
+                },
+            )
         },
         floatingActionButton = {
             FloatingActionButton(

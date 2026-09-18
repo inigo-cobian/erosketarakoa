@@ -35,7 +35,7 @@ class ListDetailViewModelTest {
         val vm = newViewModel()
         vm.uiState.test {
             awaitItem() // initial / list loaded
-            vm.addItem("Milk", 2, "Dairy", "Semi-skimmed")
+            vm.addItem("Milk", 2, "Dairy", "Semi-skimmed", "1F345")
             val state = awaitItem()
             assertEquals(1, state.items.size)
             val item = state.items.first()
@@ -43,6 +43,7 @@ class ListDetailViewModelTest {
             assertEquals(2, item.quantity)
             assertEquals("Dairy", item.category)
             assertEquals("Semi-skimmed", item.notes)
+            assertEquals("1F345", item.icon)
             assertFalse(item.bought)
             cancelAndIgnoreRemainingEvents()
         }
@@ -79,10 +80,11 @@ class ListDetailViewModelTest {
     fun updateItem_changesFields() = runTest {
         val vm = newViewModel()
         val itemId = repository.addItem(vm.listId, "Milk")
-        vm.updateItem(itemId, "Whole Milk", 3, "Dairy", null)
+        vm.updateItem(itemId, "Whole Milk", 3, "Dairy", null, "1F404")
         val updated = itemDao.getById(itemId)!!
         assertEquals("Whole Milk", updated.name)
         assertEquals(3, updated.quantity)
         assertEquals("Dairy", updated.category)
+        assertEquals("1F404", updated.icon)
     }
 }

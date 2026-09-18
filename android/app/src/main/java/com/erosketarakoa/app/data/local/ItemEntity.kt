@@ -21,6 +21,8 @@ data class ItemEntity(
     val category: String? = null,
     val notes: String? = null,
     val bought: Boolean = false,
+    /** OpenMoji hexcode (filename stem), e.g. "1F345". Required; defaults to amphora. */
+    val icon: String = "1F3FA",
     val updatedAt: Long = 0,
     val isDeleted: Boolean = false,
 )

@@ -79,6 +79,7 @@ class FakeItemDao : ItemDao {
         quantity: Int,
         category: String?,
         notes: String?,
+        icon: String,
         updatedAt: Long,
     ) {
         state.value[id]?.let {
@@ -88,6 +89,7 @@ class FakeItemDao : ItemDao {
                     quantity = quantity,
                     category = category,
                     notes = notes,
+                    icon = icon,
                     updatedAt = updatedAt,
                 ),
             )

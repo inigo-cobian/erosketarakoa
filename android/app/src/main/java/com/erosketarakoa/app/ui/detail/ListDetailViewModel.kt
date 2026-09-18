@@ -41,17 +41,24 @@ class ListDetailViewModel @Inject constructor(
             initialValue = ListDetailUiState(),
         )
 
-    fun addItem(name: String, quantity: Int, category: String?, notes: String?) {
+    fun addItem(name: String, quantity: Int, category: String?, notes: String?, icon: String) {
         if (name.isBlank()) return
         viewModelScope.launch {
-            repository.addItem(listId, name, quantity, category, notes)
+            repository.addItem(listId, name, quantity, category, notes, icon)
         }
     }
 
-    fun updateItem(id: String, name: String, quantity: Int, category: String?, notes: String?) {
+    fun updateItem(
+        id: String,
+        name: String,
+        quantity: Int,
+        category: String?,
+        notes: String?,
+        icon: String,
+    ) {
         if (name.isBlank()) return
         viewModelScope.launch {
-            repository.updateItem(id, name, quantity, category, notes)
+            repository.updateItem(id, name, quantity, category, notes, icon)
         }
     }
 

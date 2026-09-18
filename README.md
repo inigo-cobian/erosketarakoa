@@ -63,3 +63,9 @@ cd android
 
 1. Create lists and add items.
 2. Everything is saved locally on the device.
+
+## Attribution
+
+Item icons are from [OpenMoji](https://openmoji.org), licensed under
+[Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/).
+The same credit is shown in the app's About screen.

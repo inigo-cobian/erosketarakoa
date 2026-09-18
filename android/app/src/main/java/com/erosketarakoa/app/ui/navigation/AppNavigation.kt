@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.erosketarakoa.app.ui.about.AboutScreen
 import com.erosketarakoa.app.ui.detail.ListDetailScreen
 import com.erosketarakoa.app.ui.lists.ListsScreen
 
@@ -14,6 +15,7 @@ import com.erosketarakoa.app.ui.lists.ListsScreen
 object Routes {
     const val LISTS = "lists"
     const val LIST_DETAIL = "lists/{listId}"
+    const val ABOUT = "about"
 
     fun listDetail(listId: String) = "lists/$listId"
 }
@@ -26,7 +28,11 @@ fun AppNavigation(
         composable(Routes.LISTS) {
             ListsScreen(
                 onOpenList = { listId -> navController.navigate(Routes.listDetail(listId)) },
+                onOpenAbout = { navController.navigate(Routes.ABOUT) },
             )
+        }
+        composable(Routes.ABOUT) {
+            AboutScreen(onBack = { navController.popBackStack() })
         }
         composable(
             route = Routes.LIST_DETAIL,

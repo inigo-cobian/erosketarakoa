@@ -32,7 +32,7 @@ interface ItemDao {
     @Query(
         """
         UPDATE items SET name = :name, quantity = :quantity, category = :category,
-        notes = :notes, updatedAt = :updatedAt WHERE id = :id
+        notes = :notes, icon = :icon, updatedAt = :updatedAt WHERE id = :id
         """,
     )
     suspend fun updateFields(
@@ -41,6 +41,7 @@ interface ItemDao {
         quantity: Int,
         category: String?,
         notes: String?,
+        icon: String,
         updatedAt: Long,
     )
 
