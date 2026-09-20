@@ -4,6 +4,7 @@ import androidx.compose.material3.Typography
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.text.googlefonts.Font
+import androidx.compose.ui.unit.sp
 import com.erosketarakoa.app.R
 
 private val provider = GoogleFont.Provider(
@@ -28,8 +29,8 @@ val AppTypography = Typography().run {
         titleLarge = titleLarge.copy(fontFamily = d),
         titleMedium = titleMedium.copy(fontFamily = d),
         titleSmall = titleSmall.copy(fontFamily = d),
-        bodyLarge = bodyLarge.copy(fontFamily = d),
-        bodyMedium = bodyMedium.copy(fontFamily = d),
+        bodyLarge = bodyLarge.copy(fontFamily = d, fontSize = 18.sp, lineHeight = 26.sp),
+        bodyMedium = bodyMedium.copy(fontFamily = d, fontSize = 16.sp, lineHeight = 22.sp),
         bodySmall = bodySmall.copy(fontFamily = d),
         labelLarge = labelLarge.copy(fontFamily = d),
         labelMedium = labelMedium.copy(fontFamily = d),
