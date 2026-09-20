@@ -179,7 +179,7 @@ fun ListDetailScreen(
             title = "Add item",
             existing = null,
             onConfirm = { form ->
-                viewModel.addItem(form.name, form.quantity, form.category, form.notes, form.icon)
+                viewModel.addItem(form.name, form.quantity, form.unit, form.supermarkets, form.category, form.notes, form.icon)
                 showAdd = false
             },
             onDismiss = { showAdd = false },
@@ -191,7 +191,7 @@ fun ListDetailScreen(
             title = "Edit item",
             existing = item,
             onConfirm = { form ->
-                viewModel.updateItem(item.id, form.name, form.quantity, form.category, form.notes, form.icon)
+                viewModel.updateItem(item.id, form.name, form.quantity, form.unit, form.supermarkets, form.category, form.notes, form.icon)
                 editing = null
             },
             onDismiss = { editing = null },
@@ -207,7 +207,16 @@ private fun ItemRow(
     dragModifier: Modifier = Modifier,
 ) {
     val subtitle = buildString {
-        if (item.quantity > 1) append("x${item.quantity}")
+        val qtyText = when {
+            item.unit != null -> "${item.quantity} ${item.unit}"
+            item.quantity > 1 -> "x${item.quantity}"
+            else -> ""
+        }
+        if (qtyText.isNotEmpty()) append(qtyText)
+        item.supermarketList.takeIf { it.isNotEmpty() }?.let {
+            if (isNotEmpty()) append(" · ")
+            append(it.joinToString(", "))
+        }
         item.category?.let {
             if (isNotEmpty()) append(" · ")
             append(it)

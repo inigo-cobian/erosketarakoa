@@ -37,7 +37,8 @@ interface ItemDao {
 
     @Query(
         """
-        UPDATE items SET name = :name, quantity = :quantity, category = :category,
+        UPDATE items SET name = :name, quantity = :quantity, unit = :unit,
+        supermarkets = :supermarkets, category = :category,
         notes = :notes, icon = :icon, updatedAt = :updatedAt WHERE id = :id
         """,
     )
@@ -45,6 +46,8 @@ interface ItemDao {
         id: String,
         name: String,
         quantity: Int,
+        unit: String?,
+        supermarkets: String,
         category: String?,
         notes: String?,
         icon: String,

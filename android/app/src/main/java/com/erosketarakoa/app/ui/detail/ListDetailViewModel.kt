@@ -63,10 +63,18 @@ class ListDetailViewModel @Inject constructor(
         viewModelScope.launch { repository.reorderItems(order.map { it.id }) }
     }
 
-    fun addItem(name: String, quantity: Int, category: String?, notes: String?, icon: String) {
+    fun addItem(
+        name: String,
+        quantity: Int,
+        unit: String?,
+        supermarkets: List<String>,
+        category: String?,
+        notes: String?,
+        icon: String,
+    ) {
         if (name.isBlank()) return
         viewModelScope.launch {
-            repository.addItem(listId, name, quantity, category, notes, icon)
+            repository.addItem(listId, name, quantity, unit, supermarkets, category, notes, icon)
         }
     }
 
@@ -74,13 +82,15 @@ class ListDetailViewModel @Inject constructor(
         id: String,
         name: String,
         quantity: Int,
+        unit: String?,
+        supermarkets: List<String>,
         category: String?,
         notes: String?,
         icon: String,
     ) {
         if (name.isBlank()) return
         viewModelScope.launch {
-            repository.updateItem(id, name, quantity, category, notes, icon)
+            repository.updateItem(id, name, quantity, unit, supermarkets, category, notes, icon)
         }
     }
 

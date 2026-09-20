@@ -2,13 +2,16 @@ package com.erosketarakoa.app.ui.detail
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -19,6 +22,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.unit.dp
 import com.erosketarakoa.app.data.local.ItemEntity
+import com.erosketarakoa.app.data.local.SUPERMARKET_OPTIONS
 import com.erosketarakoa.app.ui.icon.DEFAULT_ICON
 import com.erosketarakoa.app.ui.icon.IconPickerGrid
 
@@ -29,11 +33,14 @@ const val ITEM_SAVE_BUTTON_TAG = "item_save_button"
 data class ItemFormValues(
     val name: String,
     val quantity: Int,
+    val unit: String?,
+    val supermarkets: List<String>,
     val category: String?,
     val notes: String?,
     val icon: String,
 )
 
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun ItemEditorDialog(
     title: String,
@@ -43,6 +50,10 @@ fun ItemEditorDialog(
 ) {
     var name by remember { mutableStateOf(existing?.name ?: "") }
     var quantity by remember { mutableStateOf((existing?.quantity ?: 1).toString()) }
+    var unit by remember { mutableStateOf(existing?.unit ?: "") }
+    val supermarkets = remember {
+        mutableStateListOf<String>().apply { existing?.supermarketList?.let { addAll(it) } }
+    }
     var category by remember { mutableStateOf(existing?.category ?: "") }
     var notes by remember { mutableStateOf(existing?.notes ?: "") }
     var icon by remember { mutableStateOf(existing?.icon ?: DEFAULT_ICON) }
@@ -71,6 +82,26 @@ fun ItemEditorDialog(
                         .fillMaxWidth()
                         .testTag(ITEM_QTY_FIELD_TAG),
                 )
+                OutlinedTextField(
+                    value = unit,
+                    onValueChange = { unit = it },
+                    label = { Text("Unit (optional, e.g. kg, bags)") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Text("Supermarkets")
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    SUPERMARKET_OPTIONS.forEach { market ->
+                        val selected = market in supermarkets
+                        FilterChip(
+                            selected = selected,
+                            onClick = {
+                                if (selected) supermarkets.remove(market) else supermarkets.add(market)
+                            },
+                            label = { Text(market) },
+                        )
+                    }
+                }
                 OutlinedTextField(
                     value = category,
                     onValueChange = { category = it },
@@ -103,6 +134,8 @@ fun ItemEditorDialog(
                         ItemFormValues(
                             name = name,
                             quantity = quantity.toIntOrNull() ?: 1,
+                            unit = unit.ifBlank { null },
+                            supermarkets = supermarkets.toList(),
                             category = category.ifBlank { null },
                             notes = notes.ifBlank { null },
                             icon = icon,

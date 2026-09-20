@@ -78,7 +78,7 @@ class MigrationTest {
 
         // --- Open with Room applying the real migrations up to the current version. ---
         val db = Room.databaseBuilder(context, AppDatabase::class.java, dbName)
-            .addMigrations(AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4)
+            .addMigrations(AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5)
             .build()
         val item = db.itemDao().getById("i1")!!
         assertEquals("Milk", item.name)
@@ -147,7 +147,7 @@ class MigrationTest {
 
         // --- Open with the real migration and check seeded positions. ---
         val db = Room.databaseBuilder(context, AppDatabase::class.java, dbName)
-            .addMigrations(AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4)
+            .addMigrations(AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5)
             .build()
         val ordered = db.itemDao().observeActiveItems("l1").first()
         assertEquals(listOf("Apple", "Milk", "Bread"), ordered.map { it.name })
