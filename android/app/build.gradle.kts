@@ -85,6 +85,9 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
+    // Fonts
+    implementation("androidx.compose.ui:ui-text-google-fonts")
+
     // Unit tests
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
