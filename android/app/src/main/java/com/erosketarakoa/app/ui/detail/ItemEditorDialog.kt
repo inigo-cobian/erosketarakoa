@@ -3,6 +3,7 @@ package com.erosketarakoa.app.ui.detail
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
@@ -72,23 +73,25 @@ fun ItemEditorDialog(
                         .fillMaxWidth()
                         .testTag(ITEM_NAME_FIELD_TAG),
                 )
-                OutlinedTextField(
-                    value = quantity,
-                    onValueChange = { new -> quantity = new.filter { it.isDigit() }.take(4) },
-                    label = { Text("Quantity") },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag(ITEM_QTY_FIELD_TAG),
-                )
-                OutlinedTextField(
-                    value = unit,
-                    onValueChange = { unit = it },
-                    label = { Text("Unit (optional, e.g. kg, bags)") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = quantity,
+                        onValueChange = { new -> quantity = new.filter { it.isDigit() }.take(4) },
+                        label = { Text("Quantity") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier
+                            .weight(1f)
+                            .testTag(ITEM_QTY_FIELD_TAG),
+                    )
+                    OutlinedTextField(
+                        value = unit,
+                        onValueChange = { unit = it },
+                        label = { Text("Unit (e.g. kg)") },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
                 Text("Supermarkets")
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     SUPERMARKET_OPTIONS.forEach { market ->
