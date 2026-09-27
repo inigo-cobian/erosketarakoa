@@ -17,6 +17,7 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -38,6 +39,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -49,6 +51,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
@@ -63,6 +67,8 @@ import com.erosketarakoa.app.data.ThemeMode
 import com.erosketarakoa.app.data.local.ListEntity
 import com.erosketarakoa.app.ui.settings.ThemeViewModel
 import com.erosketarakoa.app.ui.theme.RoundedHexagonShape
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 const val LISTS_SCREEN_TAG = "lists_screen"
 const val ADD_LIST_FAB_TAG = "add_list_fab"
@@ -119,15 +125,28 @@ fun ListsScreen(
             if (!state.isLoading && state.lists.isEmpty()) {
                 EmptyState()
             } else {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                val haptic = LocalHapticFeedback.current
+                val lazyListState = rememberLazyListState()
+                val reorderState = rememberReorderableLazyListState(lazyListState) { from, to ->
+                    viewModel.moveList(from.index, to.index)
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                }
+                LazyColumn(state = lazyListState, modifier = Modifier.fillMaxSize()) {
                     items(state.lists, key = { it.id }) { list ->
-                        ListRow(
-                            list = list,
-                            onClick = { onOpenList(list.id) },
-                            onRename = { editing = list },
-                            onDelete = { viewModel.deleteList(list.id) },
-                        )
-                        HorizontalDivider()
+                        ReorderableItem(reorderState, key = list.id) { isDragging ->
+                            Surface(tonalElevation = if (isDragging) 4.dp else 0.dp) {
+                                ListRow(
+                                    list = list,
+                                    onClick = { onOpenList(list.id) },
+                                    onRename = { editing = list },
+                                    onDelete = { viewModel.deleteList(list.id) },
+                                    dragModifier = Modifier.longPressDraggableHandle(
+                                        onDragStopped = { viewModel.commitReorder() },
+                                    ),
+                                )
+                            }
+                            HorizontalDivider()
+                        }
                     }
                 }
             }
@@ -256,6 +275,7 @@ private fun ListRow(
     onClick: () -> Unit,
     onRename: () -> Unit,
     onDelete: () -> Unit,
+    dragModifier: Modifier = Modifier,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     ListItem(
@@ -281,7 +301,7 @@ private fun ListRow(
                 }
             }
         },
-        modifier = Modifier.clickable { onClick() },
+        modifier = dragModifier.clickable { onClick() },
     )
 }
 

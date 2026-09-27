@@ -15,7 +15,14 @@ class FakeListDao : ListDao {
     private val state = MutableStateFlow<Map<String, ListEntity>>(emptyMap())
 
     override fun observeActiveLists(): Flow<List<ListEntity>> =
-        state.map { m -> m.values.filter { !it.isDeleted }.sortedBy { it.name.lowercase() } }
+        state.map { m -> m.values.filter { !it.isDeleted }.sortedBy { it.position } }
+
+    override suspend fun maxPosition(): Int? =
+        state.value.values.filter { !it.isDeleted }.maxOfOrNull { it.position }
+
+    override suspend fun setPosition(id: String, position: Int, updatedAt: Long) {
+        state.value[id]?.let { upsert(it.copy(position = position, updatedAt = updatedAt)) }
+    }
 
     override fun observeList(id: String): Flow<ListEntity?> = state.map { it[id] }
 

@@ -26,15 +26,23 @@ class ShoppingRepository @Inject constructor(
 
     suspend fun createList(name: String): String {
         val id = clock.newId()
+        val nextPosition = (listDao.maxPosition() ?: -1) + 1
         listDao.upsert(
             ListEntity(
                 id = id,
                 name = name.trim(),
+                position = nextPosition,
                 updatedAt = clock.nowMillis(),
                 isDeleted = false,
             ),
         )
         return id
+    }
+
+    /** Persist a new manual list order. [orderedIds] is the full list top-to-bottom. */
+    suspend fun reorderLists(orderedIds: List<String>) {
+        val now = clock.nowMillis()
+        orderedIds.forEachIndexed { index, id -> listDao.setPosition(id, index, now) }
     }
 
     suspend fun renameList(id: String, name: String) {

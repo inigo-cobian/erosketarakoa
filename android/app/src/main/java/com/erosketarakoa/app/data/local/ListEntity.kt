@@ -14,6 +14,8 @@ data class ListEntity(
     @PrimaryKey
     val id: String,
     val name: String,
+    /** Manual sort order; lower shows first. */
+    val position: Int = 0,
     val updatedAt: Long = 0,
     val isDeleted: Boolean = false,
 )
