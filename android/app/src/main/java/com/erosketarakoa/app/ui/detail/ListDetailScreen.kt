@@ -51,8 +51,11 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.text.font.FontStyle
+import com.erosketarakoa.app.data.ItemDetail
 import com.erosketarakoa.app.data.local.ItemEntity
 import com.erosketarakoa.app.ui.icon.OpenMojiIcon
+import com.erosketarakoa.app.ui.settings.ThemeViewModel
 import com.erosketarakoa.app.ui.theme.RoundedHexagonShape
 import kotlinx.coroutines.launch
 import sh.calvin.reorderable.ReorderableItem
@@ -66,8 +69,10 @@ const val ADD_ITEM_FAB_TAG = "add_item_fab"
 fun ListDetailScreen(
     onBack: () -> Unit,
     viewModel: ListDetailViewModel = hiltViewModel(),
+    themeViewModel: ThemeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val visibleDetails by themeViewModel.visibleDetails.collectAsStateWithLifecycle()
 
     var showAdd by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf<ItemEntity?>(null) }
@@ -158,6 +163,7 @@ fun ListDetailScreen(
                                 Surface(tonalElevation = if (isDragging) 4.dp else 0.dp) {
                                     ItemRow(
                                         item = item,
+                                        visibleDetails = visibleDetails,
                                         onToggle = { viewModel.toggleBought(item) },
                                         onEdit = { editing = item },
                                         dragModifier = Modifier.longPressDraggableHandle(
@@ -202,28 +208,37 @@ fun ListDetailScreen(
 @Composable
 private fun ItemRow(
     item: ItemEntity,
+    visibleDetails: Set<ItemDetail>,
     onToggle: () -> Unit,
     onEdit: () -> Unit,
     dragModifier: Modifier = Modifier,
 ) {
     val subtitle = buildString {
-        val qtyText = when {
-            item.unit != null -> "${item.quantity} ${item.unit}"
-            item.quantity > 1 -> "x${item.quantity}"
-            else -> ""
+        if (ItemDetail.QUANTITY in visibleDetails) {
+            val qtyText = when {
+                item.unit != null -> "${item.quantity} ${item.unit}"
+                item.quantity > 1 -> "x${item.quantity}"
+                else -> ""
+            }
+            if (qtyText.isNotEmpty()) append(qtyText)
         }
-        if (qtyText.isNotEmpty()) append(qtyText)
-        item.supermarketList.takeIf { it.isNotEmpty() }?.let {
-            if (isNotEmpty()) append(" · ")
-            append(it.joinToString(", "))
+        if (ItemDetail.SUPERMARKETS in visibleDetails) {
+            item.supermarketList.takeIf { it.isNotEmpty() }?.let {
+                if (isNotEmpty()) append(" · ")
+                append(it.joinToString(", "))
+            }
         }
-        item.category?.let {
-            if (isNotEmpty()) append(" · ")
-            append(it)
+        if (ItemDetail.CATEGORY in visibleDetails) {
+            item.category?.let {
+                if (isNotEmpty()) append(" · ")
+                append(it)
+            }
         }
-        item.notes?.let {
-            if (isNotEmpty()) append(" · ")
-            append(it)
+        if (ItemDetail.NOTES in visibleDetails) {
+            item.notes?.let {
+                if (isNotEmpty()) append(" · ")
+                append(it)
+            }
         }
     }
     ListItem(
@@ -236,7 +251,15 @@ private fun ItemRow(
                 textDecoration = if (item.bought) TextDecoration.LineThrough else TextDecoration.None,
             )
         },
-        supportingContent = { if (subtitle.isNotBlank()) Text(subtitle) },
+        supportingContent = {
+            if (subtitle.isNotBlank()) {
+                Text(
+                    subtitle,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontStyle = FontStyle.Italic,
+                )
+            }
+        },
         trailingContent = {
             IconButton(onClick = onEdit) {
                 Icon(Icons.Default.MoreVert, contentDescription = "Edit item")

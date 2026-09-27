@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -57,6 +58,7 @@ import androidx.graphics.shapes.RoundedPolygon
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.erosketarakoa.app.data.FontSize
+import com.erosketarakoa.app.data.ItemDetail
 import com.erosketarakoa.app.data.ThemeMode
 import com.erosketarakoa.app.data.local.ListEntity
 import com.erosketarakoa.app.ui.settings.ThemeViewModel
@@ -170,6 +172,7 @@ private fun ThemeSettingsDialog(
 ) {
     val currentTheme by themeViewModel.themeMode.collectAsStateWithLifecycle()
     val currentFontSize by themeViewModel.fontSize.collectAsStateWithLifecycle()
+    val visibleDetails by themeViewModel.visibleDetails.collectAsStateWithLifecycle()
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Settings") },
@@ -193,6 +196,22 @@ private fun ThemeSettingsDialog(
                             label = size.label(),
                             selected = size == currentFontSize,
                             onSelect = { themeViewModel.setFontSize(size) },
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Item details", style = MaterialTheme.typography.titleSmall)
+                ItemDetail.entries.forEach { detail ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(detail.label, modifier = Modifier.weight(1f))
+                        Switch(
+                            checked = detail in visibleDetails,
+                            onCheckedChange = { themeViewModel.setDetailVisible(detail, it) },
                         )
                     }
                 }
