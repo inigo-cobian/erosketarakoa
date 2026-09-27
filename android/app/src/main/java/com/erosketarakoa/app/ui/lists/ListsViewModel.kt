@@ -2,6 +2,7 @@ package com.erosketarakoa.app.ui.lists
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.erosketarakoa.app.data.ListColor
 import com.erosketarakoa.app.data.ShoppingRepository
 import com.erosketarakoa.app.data.local.ListEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -52,14 +53,14 @@ class ListsViewModel @Inject constructor(
         viewModelScope.launch { repository.reorderLists(order.map { it.id }) }
     }
 
-    fun createList(name: String) {
+    fun createList(name: String, color: ListColor = ListColor.DEFAULT) {
         if (name.isBlank()) return
-        viewModelScope.launch { repository.createList(name) }
+        viewModelScope.launch { repository.createList(name, color) }
     }
 
-    fun renameList(id: String, name: String) {
+    fun renameList(id: String, name: String, color: ListColor = ListColor.DEFAULT) {
         if (name.isBlank()) return
-        viewModelScope.launch { repository.renameList(id, name) }
+        viewModelScope.launch { repository.renameList(id, name, color) }
     }
 
     fun deleteList(id: String) {

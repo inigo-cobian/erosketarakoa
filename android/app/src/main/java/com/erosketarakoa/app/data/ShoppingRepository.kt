@@ -2,6 +2,7 @@ package com.erosketarakoa.app.data
 
 import com.erosketarakoa.app.data.local.ItemDao
 import com.erosketarakoa.app.data.local.ItemEntity
+import com.erosketarakoa.app.data.ListColor
 import com.erosketarakoa.app.data.local.ListDao
 import com.erosketarakoa.app.data.local.ListEntity
 import kotlinx.coroutines.flow.Flow
@@ -24,13 +25,14 @@ class ShoppingRepository @Inject constructor(
 
     fun observeList(id: String): Flow<ListEntity?> = listDao.observeList(id)
 
-    suspend fun createList(name: String): String {
+    suspend fun createList(name: String, color: ListColor = ListColor.DEFAULT): String {
         val id = clock.newId()
         val nextPosition = (listDao.maxPosition() ?: -1) + 1
         listDao.upsert(
             ListEntity(
                 id = id,
                 name = name.trim(),
+                color = color.name,
                 position = nextPosition,
                 updatedAt = clock.nowMillis(),
                 isDeleted = false,
@@ -45,8 +47,8 @@ class ShoppingRepository @Inject constructor(
         orderedIds.forEachIndexed { index, id -> listDao.setPosition(id, index, now) }
     }
 
-    suspend fun renameList(id: String, name: String) {
-        listDao.rename(id, name.trim(), clock.nowMillis())
+    suspend fun renameList(id: String, name: String, color: ListColor) {
+        listDao.update(id, name.trim(), color.name, clock.nowMillis())
     }
 
     suspend fun deleteList(id: String) {

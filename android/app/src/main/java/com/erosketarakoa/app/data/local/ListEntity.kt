@@ -14,6 +14,8 @@ data class ListEntity(
     @PrimaryKey
     val id: String,
     val name: String,
+    /** Palette tag stored as a [com.erosketarakoa.app.data.ListColor] name. Defaults to WHITE. */
+    val color: String = "WHITE",
     /** Manual sort order; lower shows first. */
     val position: Int = 0,
     val updatedAt: Long = 0,

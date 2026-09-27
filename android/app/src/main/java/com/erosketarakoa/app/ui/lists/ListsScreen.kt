@@ -1,6 +1,8 @@
 package com.erosketarakoa.app.ui.lists
 
 import android.graphics.drawable.shapes.RoundRectShape
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -50,7 +54,9 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
@@ -63,6 +69,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.erosketarakoa.app.data.FontSize
 import com.erosketarakoa.app.data.ItemDetail
+import com.erosketarakoa.app.data.ListColor
 import com.erosketarakoa.app.data.ThemeMode
 import com.erosketarakoa.app.data.local.ListEntity
 import com.erosketarakoa.app.ui.settings.ThemeViewModel
@@ -154,12 +161,15 @@ fun ListsScreen(
     }
 
     if (showCreate) {
+        var pendingName by remember { mutableStateOf("") }
         TextInputDialog(
             title = "New list",
             initial = "",
             confirmLabel = "Create",
-            onConfirm = {
-                viewModel.createList(it)
+            initialColor = ListColor.DEFAULT,
+            onConfirm = { pendingName = it },
+            onConfirmColor = {
+                viewModel.createList(pendingName, it)
                 showCreate = false
             },
             onDismiss = { showCreate = false },
@@ -167,12 +177,15 @@ fun ListsScreen(
     }
 
     editing?.let { list ->
+        var pendingName by remember(list.id) { mutableStateOf(list.name) }
         TextInputDialog(
-            title = "Rename list",
+            title = "Edit list",
             initial = list.name,
             confirmLabel = "Save",
-            onConfirm = {
-                viewModel.renameList(list.id, it)
+            initialColor = ListColor.from(list.color),
+            onConfirm = { pendingName = it },
+            onConfirmColor = {
+                viewModel.renameList(list.id, pendingName, it)
                 editing = null
             },
             onDismiss = { editing = null },
@@ -256,6 +269,16 @@ private fun SettingOption(label: String, selected: Boolean, onSelect: () -> Unit
     }
 }
 
+/**
+ * Header text color for a list. WHITE and BLACK keep the system theme's font color (so the name
+ * stays readable on any background); the swatch still shows the real choice. Other colors tint
+ * the text directly.
+ */
+@Composable
+private fun headerColor(color: ListColor): Color =
+    if (color == ListColor.WHITE || color == ListColor.BLACK) MaterialTheme.colorScheme.onSurface
+    else color.swatch
+
 private fun ThemeMode.label(): String = when (this) {
     ThemeMode.SYSTEM -> "System default"
     ThemeMode.LIGHT -> "Light"
@@ -278,8 +301,23 @@ private fun ListRow(
     dragModifier: Modifier = Modifier,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
+    val listColor = ListColor.from(list.color)
     ListItem(
-        headlineContent = { Text(list.name) },
+        leadingContent = {
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(listColor.swatch)
+                    .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape),
+            )
+        },
+        headlineContent = {
+            Text(
+                list.name,
+                color = headerColor(listColor),
+            )
+        },
         trailingContent = {
             Box {
                 Icon(

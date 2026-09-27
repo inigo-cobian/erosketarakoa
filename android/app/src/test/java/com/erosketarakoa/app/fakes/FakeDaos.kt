@@ -46,6 +46,12 @@ class FakeListDao : ListDao {
         }
     }
 
+    override suspend fun update(id: String, name: String, color: String, updatedAt: Long) {
+        state.value[id]?.let {
+            upsert(it.copy(name = name, color = color, updatedAt = updatedAt))
+        }
+    }
+
     override suspend fun softDelete(id: String, updatedAt: Long) {
         state.value[id]?.let {
             upsert(it.copy(isDeleted = true, updatedAt = updatedAt))

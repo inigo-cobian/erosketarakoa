@@ -46,6 +46,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -53,6 +54,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.text.font.FontStyle
 import com.erosketarakoa.app.data.ItemDetail
+import com.erosketarakoa.app.data.ListColor
 import com.erosketarakoa.app.data.local.ItemEntity
 import com.erosketarakoa.app.ui.icon.OpenMojiIcon
 import com.erosketarakoa.app.ui.settings.ThemeViewModel
@@ -84,7 +86,14 @@ fun ListDetailScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text(state.list?.name ?: "List") },
+                title = {
+                    val listColor = ListColor.from(state.list?.color)
+                    val tintsHeader = listColor != ListColor.WHITE && listColor != ListColor.BLACK
+                    Text(
+                        text = state.list?.name ?: "List",
+                        color = if (tintsHeader) listColor.swatch else Color.Unspecified,
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")

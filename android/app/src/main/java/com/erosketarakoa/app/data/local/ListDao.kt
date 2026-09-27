@@ -41,6 +41,9 @@ interface ListDao {
     @Query("UPDATE lists SET name = :name, updatedAt = :updatedAt WHERE id = :id")
     suspend fun rename(id: String, name: String, updatedAt: Long)
 
+    @Query("UPDATE lists SET name = :name, color = :color, updatedAt = :updatedAt WHERE id = :id")
+    suspend fun update(id: String, name: String, color: String, updatedAt: Long)
+
     @Query("UPDATE lists SET isDeleted = 1, updatedAt = :updatedAt WHERE id = :id")
     suspend fun softDelete(id: String, updatedAt: Long)
 
