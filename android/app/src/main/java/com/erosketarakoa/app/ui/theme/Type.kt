@@ -13,27 +13,26 @@ private val provider = GoogleFont.Provider(
     certificates = R.array.com_google_android_gms_fonts_certs,
 )
 
-private val firaSans = FontFamily(
-    Font(GoogleFont("Fira Sans"), provider),
-)
+private val titleFont = FontFamily(Font(GoogleFont("Limelight"), provider))
+private val bodyFont = FontFamily(Font(GoogleFont("Montserrat"), provider))
+private val labelFont = FontFamily(Font(GoogleFont("Lato"), provider))
 
 val AppTypography = Typography().run {
-    val d = FontFamily(Font(GoogleFont("Fira Sans"), provider))
     copy(
-        displayLarge = displayLarge.copy(fontFamily = d),
-        displayMedium = displayMedium.copy(fontFamily = d),
-        displaySmall = displaySmall.copy(fontFamily = d),
-        headlineLarge = headlineLarge.copy(fontFamily = d),
-        headlineMedium = headlineMedium.copy(fontFamily = d),
-        headlineSmall = headlineSmall.copy(fontFamily = d),
-        titleLarge = titleLarge.copy(fontFamily = d),
-        titleMedium = titleMedium.copy(fontFamily = d),
-        titleSmall = titleSmall.copy(fontFamily = d),
-        bodyLarge = bodyLarge.copy(fontFamily = d),
-        bodyMedium = bodyMedium.copy(fontFamily = d),
-        bodySmall = bodySmall.copy(fontFamily = d),
-        labelLarge = labelLarge.copy(fontFamily = d),
-        labelMedium = labelMedium.copy(fontFamily = d),
-        labelSmall = labelSmall.copy(fontFamily = d),
+        displayLarge = displayLarge.copy(fontFamily = titleFont),
+        displayMedium = displayMedium.copy(fontFamily = titleFont),
+        displaySmall = displaySmall.copy(fontFamily = titleFont),
+        headlineLarge = headlineLarge.copy(fontFamily = titleFont),
+        headlineMedium = headlineMedium.copy(fontFamily = titleFont),
+        headlineSmall = headlineSmall.copy(fontFamily = titleFont),
+        titleLarge = titleLarge.copy(fontFamily = titleFont),
+        titleMedium = titleMedium.copy(fontFamily = titleFont),
+        titleSmall = titleSmall.copy(fontFamily = titleFont),
+        bodyLarge = bodyLarge.copy(fontFamily = bodyFont),
+        bodyMedium = bodyMedium.copy(fontFamily = bodyFont),
+        bodySmall = bodySmall.copy(fontFamily = bodyFont),
+        labelLarge = labelLarge.copy(fontFamily = labelFont),
+        labelMedium = labelMedium.copy(fontFamily = labelFont),
+        labelSmall = labelSmall.copy(fontFamily = labelFont),
     )
 }
