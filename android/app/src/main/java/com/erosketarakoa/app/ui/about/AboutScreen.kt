@@ -54,6 +54,15 @@ fun AboutScreen(onBack: () -> Unit) {
                 "OpenMoji is licensed under Creative Commons Attribution-ShareAlike 4.0 " +
                     "International (CC BY-SA 4.0). https://openmoji.org",
             )
+
+            Text("Fonts", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "Text uses Limelight, Montserrat and Lato from Google Fonts.",
+            )
+            Text(
+                "These fonts are licensed under the SIL Open Font License 1.1. " +
+                    "https://fonts.google.com",
+            )
         }
     }
 }
