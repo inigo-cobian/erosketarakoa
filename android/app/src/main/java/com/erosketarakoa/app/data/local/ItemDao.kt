@@ -63,6 +63,9 @@ interface ItemDao {
     @Query("UPDATE items SET isDeleted = 1, updatedAt = :updatedAt WHERE listId = :listId")
     suspend fun softDeleteByList(listId: String, updatedAt: Long)
 
+    @Query("UPDATE items SET isDeleted = 0, updatedAt = :updatedAt WHERE listId = :listId")
+    suspend fun restoreByList(listId: String, updatedAt: Long)
+
     @Query("DELETE FROM items")
     suspend fun clear()
 }

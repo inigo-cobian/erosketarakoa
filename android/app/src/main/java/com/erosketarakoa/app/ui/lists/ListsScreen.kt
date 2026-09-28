@@ -18,12 +18,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -31,13 +27,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -58,6 +61,7 @@ import com.erosketarakoa.app.data.ListColor
 import com.erosketarakoa.app.data.local.ListEntity
 import com.erosketarakoa.app.ui.settings.ThemeViewModel
 import com.erosketarakoa.app.ui.theme.RoundedHexagonShape
+import kotlinx.coroutines.launch
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
@@ -82,7 +86,11 @@ fun ListsScreen(
     var showCreate by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf<ListEntity?>(null) }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -131,16 +139,52 @@ fun ListsScreen(
                 LazyColumn(state = lazyListState, modifier = Modifier.fillMaxSize()) {
                     items(state.lists, key = { it.id }) { list ->
                         ReorderableItem(reorderState, key = list.id) { isDragging ->
-                            Surface(tonalElevation = if (isDragging) 4.dp else 0.dp) {
-                                ListRow(
-                                    list = list,
-                                    onClick = { onOpenList(list.id) },
-                                    onRename = { editing = list },
-                                    onDelete = { viewModel.deleteList(list.id) },
-                                    dragModifier = Modifier.longPressDraggableHandle(
-                                        onDragStopped = { viewModel.commitReorder() },
-                                    ),
-                                )
+                            val dismissState = rememberSwipeToDismissBoxState(
+                                confirmValueChange = { value ->
+                                    if (value == SwipeToDismissBoxValue.StartToEnd) {
+                                        viewModel.deleteList(list.id)
+                                        scope.launch {
+                                            val result = snackbarHostState.showSnackbar(
+                                                message = "Deleted ${list.name}",
+                                                actionLabel = "Undo",
+                                            )
+                                            if (result == SnackbarResult.ActionPerformed) {
+                                                viewModel.restoreList(list)
+                                            }
+                                        }
+                                    }
+                                    value == SwipeToDismissBoxValue.StartToEnd
+                                },
+                            )
+                            SwipeToDismissBox(
+                                state = dismissState,
+                                enableDismissFromEndToStart = false,
+                                backgroundContent = {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(MaterialTheme.colorScheme.errorContainer)
+                                            .padding(horizontal = 24.dp),
+                                        contentAlignment = Alignment.CenterStart,
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Delete,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onErrorContainer,
+                                        )
+                                    }
+                                },
+                            ) {
+                                Surface(tonalElevation = if (isDragging) 4.dp else 0.dp) {
+                                    ListRow(
+                                        list = list,
+                                        onClick = { onOpenList(list.id) },
+                                        onEditColor = { editing = list },
+                                        dragModifier = Modifier.longPressDraggableHandle(
+                                            onDragStopped = { viewModel.commitReorder() },
+                                        ),
+                                    )
+                                }
                             }
                             HorizontalDivider()
                         }
@@ -197,11 +241,9 @@ private fun headerColor(color: ListColor): Color =
 private fun ListRow(
     list: ListEntity,
     onClick: () -> Unit,
-    onRename: () -> Unit,
-    onDelete: () -> Unit,
+    onEditColor: () -> Unit,
     dragModifier: Modifier = Modifier,
 ) {
-    var menuOpen by remember { mutableStateOf(false) }
     val listColor = ListColor.from(list.color)
     ListItem(
         leadingContent = {
@@ -210,7 +252,8 @@ private fun ListRow(
                     .size(24.dp)
                     .clip(CircleShape)
                     .background(listColor.swatch)
-                    .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape),
+                    .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                    .clickable { onEditColor() },
             )
         },
         headlineContent = {
@@ -218,27 +261,6 @@ private fun ListRow(
                 list.name,
                 color = headerColor(listColor),
             )
-        },
-        trailingContent = {
-            Box {
-                Icon(
-                    Icons.Default.MoreVert,
-                    contentDescription = "More",
-                    modifier = Modifier.clickable { menuOpen = true },
-                )
-                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                    DropdownMenuItem(
-                        text = { Text("Rename") },
-                        leadingIcon = { Icon(Icons.Default.Edit, null) },
-                        onClick = { menuOpen = false; onRename() },
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Delete") },
-                        leadingIcon = { Icon(Icons.Default.Delete, null) },
-                        onClick = { menuOpen = false; onDelete() },
-                    )
-                }
-            }
         },
         modifier = dragModifier.clickable { onClick() },
     )

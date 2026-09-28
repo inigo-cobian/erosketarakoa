@@ -66,4 +66,8 @@ class ListsViewModel @Inject constructor(
     fun deleteList(id: String) {
         viewModelScope.launch { repository.deleteList(id) }
     }
+
+    fun restoreList(list: ListEntity) {
+        viewModelScope.launch { repository.restoreList(list) }
+    }
 }

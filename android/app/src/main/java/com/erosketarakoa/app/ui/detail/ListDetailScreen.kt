@@ -15,7 +15,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -252,7 +251,9 @@ private fun ItemRow(
     }
     ListItem(
         leadingContent = {
-            OpenMojiIcon(hexcode = item.icon)
+            Box(modifier = Modifier.clickable { onEdit() }) {
+                OpenMojiIcon(hexcode = item.icon)
+            }
         },
         headlineContent = {
             Text(
@@ -267,11 +268,6 @@ private fun ItemRow(
                     style = MaterialTheme.typography.labelSmall,
                     fontStyle = FontStyle.Italic,
                 )
-            }
-        },
-        trailingContent = {
-            IconButton(onClick = onEdit) {
-                Icon(Icons.Default.MoreVert, contentDescription = "Edit item")
             }
         },
         modifier = dragModifier

@@ -58,6 +58,13 @@ class ShoppingRepository @Inject constructor(
         itemDao.softDeleteByList(id, now)
     }
 
+    /** Un-delete a list and its cascaded items, reversing [deleteList]. */
+    suspend fun restoreList(list: ListEntity) {
+        val now = clock.nowMillis()
+        listDao.upsert(list.copy(isDeleted = false, updatedAt = now))
+        itemDao.restoreByList(list.id, now)
+    }
+
     // ---------------- Items ----------------
 
     fun observeItems(listId: String): Flow<List<ItemEntity>> = itemDao.observeActiveItems(listId)
