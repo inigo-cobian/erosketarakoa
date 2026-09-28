@@ -234,7 +234,7 @@ fun ListsScreen(
  */
 @Composable
 private fun headerColor(color: ListColor): Color =
-    if (color == ListColor.WHITE || color == ListColor.BLACK) MaterialTheme.colorScheme.onSurface
+    if (color.usesThemeText) MaterialTheme.colorScheme.onSurface
     else color.swatch
 
 @Composable

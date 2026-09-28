@@ -87,7 +87,7 @@ fun ListDetailScreen(
             TopAppBar(
                 title = {
                     val listColor = ListColor.from(state.list?.color)
-                    val tintsHeader = listColor != ListColor.WHITE && listColor != ListColor.BLACK
+                    val tintsHeader = !listColor.usesThemeText
                     Text(
                         text = state.list?.name ?: "List",
                         color = if (tintsHeader) listColor.swatch else Color.Unspecified,
