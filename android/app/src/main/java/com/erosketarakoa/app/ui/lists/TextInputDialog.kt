@@ -57,7 +57,10 @@ fun TextInputDialog(
                     Spacer(Modifier.height(12.dp))
                     Text("Color", style = MaterialTheme.typography.titleSmall)
                     Spacer(Modifier.height(8.dp))
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
                         ListColor.entries.forEach { option ->
                             val selected = option == color
                             Spacer(
