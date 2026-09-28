@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -42,12 +43,18 @@ fun OpenMojiIcon(
     }
     when (resolved) {
         is Resolved.System -> {
-            val fontSize = with(LocalDensity.current) { size.toSp() }
+            // Font at 0.8x the box so the glyph's line metrics (ascent+descent) fit without the
+            // bottom being clipped; lineHeight pinned to fontSize keeps it vertically centered.
+            val fontSize = with(LocalDensity.current) { (size * 0.8f).toSp() }
             Box(modifier.size(size), contentAlignment = Alignment.Center) {
                 Text(
                     text = resolved.emoji,
                     textAlign = TextAlign.Center,
-                    style = TextStyle(fontSize = fontSize),
+                    style = TextStyle(
+                        fontSize = fontSize,
+                        lineHeight = fontSize,
+                        platformStyle = PlatformTextStyle(includeFontPadding = false),
+                    ),
                 )
             }
         }
