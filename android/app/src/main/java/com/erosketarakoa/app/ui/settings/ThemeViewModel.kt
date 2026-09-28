@@ -16,8 +16,10 @@ class ThemeViewModel @Inject constructor(
     val themeMode: StateFlow<ThemeMode> = themePreference.mode
     val fontSize: StateFlow<FontSize> = themePreference.fontSize
     val visibleDetails: StateFlow<Set<ItemDetail>> = themePreference.visibleDetails
+    val title: StateFlow<String> = themePreference.title
 
     fun setThemeMode(mode: ThemeMode) = themePreference.set(mode)
     fun setFontSize(fontSize: FontSize) = themePreference.set(fontSize)
     fun setDetailVisible(detail: ItemDetail, visible: Boolean) = themePreference.setDetailVisible(detail, visible)
+    fun setTitle(title: String) = themePreference.setTitle(title)
 }

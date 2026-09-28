@@ -10,12 +10,14 @@ import androidx.navigation.navArgument
 import com.erosketarakoa.app.ui.about.AboutScreen
 import com.erosketarakoa.app.ui.detail.ListDetailScreen
 import com.erosketarakoa.app.ui.lists.ListsScreen
+import com.erosketarakoa.app.ui.settings.SettingsScreen
 
 /** Top-level navigation destinations. */
 object Routes {
     const val LISTS = "lists"
     const val LIST_DETAIL = "lists/{listId}"
     const val ABOUT = "about"
+    const val SETTINGS = "settings"
 
     fun listDetail(listId: String) = "lists/$listId"
 }
@@ -29,10 +31,14 @@ fun AppNavigation(
             ListsScreen(
                 onOpenList = { listId -> navController.navigate(Routes.listDetail(listId)) },
                 onOpenAbout = { navController.navigate(Routes.ABOUT) },
+                onOpenSettings = { navController.navigate(Routes.SETTINGS) },
             )
         }
         composable(Routes.ABOUT) {
             AboutScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Routes.SETTINGS) {
+            SettingsScreen(onBack = { navController.popBackStack() })
         }
         composable(
             route = Routes.LIST_DETAIL,

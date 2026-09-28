@@ -38,6 +38,15 @@ class ThemePreference @Inject constructor(
     private val _visibleDetails = MutableStateFlow(readVisibleDetails())
     val visibleDetails: StateFlow<Set<ItemDetail>> = _visibleDetails.asStateFlow()
 
+    private val _title = MutableStateFlow(readTitle())
+    val title: StateFlow<String> = _title.asStateFlow()
+
+    fun setTitle(title: String) {
+        val value = title.ifBlank { DEFAULT_TITLE }
+        prefs.edit().putString(KEY_TITLE, value).apply()
+        _title.value = value
+    }
+
     fun setDetailVisible(detail: ItemDetail, visible: Boolean) {
         val updated = if (visible) _visibleDetails.value + detail else _visibleDetails.value - detail
         prefs.edit().putStringSet(KEY_VISIBLE_DETAILS, updated.map { it.name }.toSet()).apply()
@@ -67,9 +76,13 @@ class ThemePreference @Inject constructor(
             ?.mapNotNull { runCatching { ItemDetail.valueOf(it) }.getOrNull() }?.toSet()
             ?: ItemDetail.entries.toSet()
 
+    private fun readTitle(): String = prefs.getString(KEY_TITLE, null) ?: DEFAULT_TITLE
+
     private companion object {
         const val KEY_THEME = "theme_mode"
         const val KEY_FONT_SIZE = "font_size"
         const val KEY_VISIBLE_DETAILS = "visible_details"
+        const val KEY_TITLE = "list_title"
+        const val DEFAULT_TITLE = "Shopping lists"
     }
 }
