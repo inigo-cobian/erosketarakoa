@@ -41,6 +41,24 @@ class ThemePreference @Inject constructor(
     private val _title = MutableStateFlow(readTitle())
     val title: StateFlow<String> = _title.asStateFlow()
 
+    private val _bargainNotifyEnabled = MutableStateFlow(prefs.getBoolean(KEY_BARGAIN_ENABLED, false))
+    val bargainNotifyEnabled: StateFlow<Boolean> = _bargainNotifyEnabled.asStateFlow()
+
+    /** Minutes-past-midnight for the daily run. Default 09:00 = 540. */
+    private val _bargainNotifyMinuteOfDay = MutableStateFlow(prefs.getInt(KEY_BARGAIN_MINUTE, 540))
+    val bargainNotifyMinuteOfDay: StateFlow<Int> = _bargainNotifyMinuteOfDay.asStateFlow()
+
+    fun setBargainNotifyEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_BARGAIN_ENABLED, enabled).apply()
+        _bargainNotifyEnabled.value = enabled
+    }
+
+    fun setBargainNotifyTime(hour: Int, minute: Int) {
+        val minuteOfDay = (hour.coerceIn(0, 23) * 60) + minute.coerceIn(0, 59)
+        prefs.edit().putInt(KEY_BARGAIN_MINUTE, minuteOfDay).apply()
+        _bargainNotifyMinuteOfDay.value = minuteOfDay
+    }
+
     fun setTitle(title: String) {
         val value = title.ifBlank { DEFAULT_TITLE }
         prefs.edit().putString(KEY_TITLE, value).apply()
@@ -84,5 +102,7 @@ class ThemePreference @Inject constructor(
         const val KEY_VISIBLE_DETAILS = "visible_details"
         const val KEY_TITLE = "list_title"
         const val DEFAULT_TITLE = "Shopping lists"
+        const val KEY_BARGAIN_ENABLED = "bargain_notify_enabled"
+        const val KEY_BARGAIN_MINUTE = "bargain_notify_minute"
     }
 }

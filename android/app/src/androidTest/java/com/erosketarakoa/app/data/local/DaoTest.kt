@@ -22,6 +22,8 @@ class DaoTest {
     private lateinit var db: AppDatabase
     private lateinit var listDao: ListDao
     private lateinit var itemDao: ItemDao
+    private lateinit var linkDao: ProductLinkDao
+    private lateinit var priceDao: PriceDao
 
     @Before
     fun setup() {
@@ -31,6 +33,8 @@ class DaoTest {
         ).allowMainThreadQueries().build()
         listDao = db.listDao()
         itemDao = db.itemDao()
+        linkDao = db.productLinkDao()
+        priceDao = db.priceDao()
     }
 
     @After
@@ -116,5 +120,54 @@ class DaoTest {
         listDao.clear()
         assertNull(listDao.getById("a"))
         assertFalse(listDao.observeActiveLists().first().isNotEmpty())
+    }
+
+    @Test
+    fun productLinkCrudAndSoftDelete() = runBlocking {
+        val itemId = UUID.randomUUID().toString()
+        val linkId = UUID.randomUUID().toString()
+        linkDao.upsert(
+            ProductLinkEntity(
+                id = linkId,
+                itemId = itemId,
+                store = "Mercadona",
+                externalProductId = "ext-1",
+                ean = "8410000000000",
+                productName = "Leche",
+                updatedAt = 1L,
+            ),
+        )
+        var links = linkDao.observeByItem(itemId).first()
+        assertEquals(1, links.size)
+        assertEquals("Mercadona", links.first().store)
+        assertEquals("ext-1", links.first().externalProductId)
+
+        linkDao.softDelete(linkId, updatedAt = 2L)
+        links = linkDao.observeByItem(itemId).first()
+        assertTrue(links.isEmpty())
+        assertTrue(linkDao.getById(linkId)!!.isDeleted)
+    }
+
+    @Test
+    fun priceInsertAndObserveByLinkAndItem() = runBlocking {
+        val itemId = UUID.randomUUID().toString()
+        val linkId = UUID.randomUUID().toString()
+        linkDao.upsert(ProductLinkEntity(id = linkId, itemId = itemId, store = "Eroski"))
+        priceDao.upsertAll(
+            listOf(
+                PriceEntity(id = "p1", linkId = linkId, priceCents = 250, observedAt = 100, source = "manual"),
+                PriceEntity(id = "p2", linkId = linkId, priceCents = 199, observedAt = 200, source = "manual"),
+            ),
+        )
+        // Oldest first.
+        val byLink = priceDao.observeByLink(linkId).first()
+        assertEquals(listOf(250L, 199L), byLink.map { it.priceCents })
+
+        val byItem = priceDao.observeByItem(itemId).first()
+        assertEquals(2, byItem.size)
+
+        priceDao.delete("p1")
+        assertNull(priceDao.getById("p1"))
+        assertEquals(1, priceDao.getByLink(linkId).size)
     }
 }

@@ -3,6 +3,7 @@ package com.erosketarakoa.app
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
@@ -10,6 +11,7 @@ import com.erosketarakoa.app.data.local.ItemEntity
 import com.erosketarakoa.app.ui.detail.ITEM_NAME_FIELD_TAG
 import com.erosketarakoa.app.ui.detail.ITEM_QTY_FIELD_TAG
 import com.erosketarakoa.app.ui.detail.ITEM_SAVE_BUTTON_TAG
+import com.erosketarakoa.app.ui.detail.ITEM_TARGET_FIELD_TAG
 import com.erosketarakoa.app.ui.detail.ItemEditorDialog
 import com.erosketarakoa.app.ui.detail.ItemFormValues
 import com.erosketarakoa.app.ui.theme.ErosketarakoTheme
@@ -43,6 +45,32 @@ class AddItemFlowTest {
 
         assertEquals("Milk", result?.name)
         assertEquals(3, result?.quantity)
+    }
+
+    @Test
+    fun addItem_setsTargetCategoryAndStoreLink() {
+        var result: ItemFormValues? = null
+        composeRule.setContent {
+            ErosketarakoTheme {
+                ItemEditorDialog(
+                    title = "Add item",
+                    existing = null,
+                    onConfirm = { result = it },
+                    onDismiss = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag(ITEM_NAME_FIELD_TAG).performTextInput("Milk")
+        composeRule.onNodeWithTag(ITEM_TARGET_FIELD_TAG).performTextInput("1.99")
+        // Link to Mercadona (in SUPERMARKET_OPTIONS is Eroski/Lidl/Dia) — use Eroski chip then its ref field.
+        composeRule.onNodeWithText("Eroski").performClick()
+        composeRule.onNodeWithTag("item_link_ref_Eroski").performTextInput("ext-42")
+        composeRule.onNodeWithTag(ITEM_SAVE_BUTTON_TAG).performClick()
+
+        assertEquals("Milk", result?.name)
+        assertEquals(199L, result?.targetPriceCents)
+        assertEquals("ext-42", result?.links?.get("Eroski"))
     }
 
     @Test

@@ -33,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -193,7 +194,7 @@ fun ListDetailScreen(
             title = "Add item",
             existing = null,
             onConfirm = { form ->
-                viewModel.addItem(form.name, form.quantity, form.unit, form.supermarkets, form.category, form.notes, form.icon)
+                viewModel.saveNewItem(form)
                 showAdd = false
             },
             onDismiss = { showAdd = false },
@@ -201,15 +202,21 @@ fun ListDetailScreen(
     }
 
     editing?.let { item ->
-        ItemEditorDialog(
-            title = "Edit item",
-            existing = item,
-            onConfirm = { form ->
-                viewModel.updateItem(item.id, form.name, form.quantity, form.unit, form.supermarkets, form.category, form.notes, form.icon)
-                editing = null
-            },
-            onDismiss = { editing = null },
-        )
+        // Load existing links once for prefill.
+        var links by remember(item.id) { mutableStateOf<Map<String, String>?>(null) }
+        LaunchedEffect(item.id) { links = viewModel.linksFor(item.id) }
+        links?.let { existingLinks ->
+            ItemEditorDialog(
+                title = "Edit item",
+                existing = item,
+                existingLinks = existingLinks,
+                onConfirm = { form ->
+                    viewModel.saveExistingItem(item.id, form)
+                    editing = null
+                },
+                onDismiss = { editing = null },
+            )
+        }
     }
 }
 

@@ -43,6 +43,8 @@ import com.erosketarakoa.app.data.ThemeMode
 
 const val SETTINGS_SCREEN_TAG = "settings_screen"
 const val SETTINGS_TITLE_FIELD_TAG = "settings_title_field"
+const val SETTINGS_BARGAIN_SWITCH_TAG = "settings_bargain_switch"
+const val SETTINGS_BARGAIN_TIME_TAG = "settings_bargain_time"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -127,6 +129,49 @@ fun SettingsScreen(
                         onCheckedChange = { themeViewModel.setDetailVisible(detail, it) },
                     )
                 }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text("Daily bargains", style = MaterialTheme.typography.titleSmall)
+            val notifyEnabled by themeViewModel.bargainNotifyEnabled.collectAsStateWithLifecycle()
+            val notifyMinute by themeViewModel.bargainNotifyMinuteOfDay.collectAsStateWithLifecycle()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text("Daily bargain notification", modifier = Modifier.weight(1f))
+                Switch(
+                    checked = notifyEnabled,
+                    onCheckedChange = { themeViewModel.setBargainNotifyEnabled(it) },
+                    modifier = Modifier.testTag(SETTINGS_BARGAIN_SWITCH_TAG),
+                )
+            }
+            val context = androidx.compose.ui.platform.LocalContext.current
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .selectable(
+                        selected = false,
+                        enabled = notifyEnabled,
+                        role = Role.Button,
+                        onClick = {
+                            android.app.TimePickerDialog(
+                                context,
+                                { _, h, m -> themeViewModel.setBargainNotifyTime(h, m) },
+                                notifyMinute / 60,
+                                notifyMinute % 60,
+                                true,
+                            ).show()
+                        },
+                    )
+                    .padding(vertical = 8.dp)
+                    .testTag(SETTINGS_BARGAIN_TIME_TAG),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text("Run time", modifier = Modifier.weight(1f))
+                Text(String.format(java.util.Locale.US, "%02d:%02d", notifyMinute / 60, notifyMinute % 60))
             }
         }
     }

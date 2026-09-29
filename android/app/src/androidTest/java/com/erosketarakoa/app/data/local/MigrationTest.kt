@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -152,6 +153,89 @@ class MigrationTest {
         val ordered = db.itemDao().observeActiveItems("l1").first()
         assertEquals(listOf("Apple", "Milk", "Bread"), ordered.map { it.name })
         assertEquals(listOf(0, 1, 2), ordered.map { it.position })
+        db.close()
+    }
+
+    @Test
+    fun migrate7To8_addsPriceTablesAndItemColumns_andKeepsData() = runBlocking {
+        // --- Create a v7 database (items + lists as of v7) and seed rows. ---
+        val helper = FrameworkSQLiteOpenHelperFactory().create(
+            androidx.sqlite.db.SupportSQLiteOpenHelper.Configuration.builder(context)
+                .name(dbName)
+                .callback(object : androidx.sqlite.db.SupportSQLiteOpenHelper.Callback(7) {
+                    override fun onCreate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                        db.execSQL(
+                            """
+                            CREATE TABLE items (
+                                id TEXT NOT NULL PRIMARY KEY,
+                                listId TEXT NOT NULL,
+                                name TEXT NOT NULL,
+                                quantity INTEGER NOT NULL,
+                                unit TEXT,
+                                supermarkets TEXT NOT NULL DEFAULT '',
+                                category TEXT,
+                                notes TEXT,
+                                bought INTEGER NOT NULL,
+                                icon TEXT NOT NULL DEFAULT '1F3FA',
+                                position INTEGER NOT NULL DEFAULT 0,
+                                updatedAt INTEGER NOT NULL,
+                                isDeleted INTEGER NOT NULL
+                            )
+                            """.trimIndent(),
+                        )
+                        db.execSQL("CREATE INDEX index_items_listId ON items(listId)")
+                        db.execSQL(
+                            """
+                            CREATE TABLE lists (
+                                id TEXT NOT NULL PRIMARY KEY,
+                                name TEXT NOT NULL,
+                                color TEXT NOT NULL DEFAULT 'WHITE',
+                                position INTEGER NOT NULL DEFAULT 0,
+                                updatedAt INTEGER NOT NULL,
+                                isDeleted INTEGER NOT NULL
+                            )
+                            """.trimIndent(),
+                        )
+                    }
+
+                    override fun onUpgrade(
+                        db: androidx.sqlite.db.SupportSQLiteDatabase,
+                        oldVersion: Int,
+                        newVersion: Int,
+                    ) = Unit
+                })
+                .build(),
+        )
+        helper.writableDatabase.execSQL(
+            "INSERT INTO lists VALUES ('l1','Groceries','WHITE',0,10,0)",
+        )
+        helper.writableDatabase.execSQL(
+            "INSERT INTO items VALUES ('i1','l1','Milk',2,'kg','Eroski','Dairy','Semi',0,'1F3FA',0,10,0)",
+        )
+        helper.close()
+
+        // --- Open with the real migration applied. ---
+        val db = Room.databaseBuilder(context, AppDatabase::class.java, dbName)
+            .addMigrations(AppDatabase.MIGRATION_7_8)
+            .build()
+
+        // Existing rows preserved; new columns default to null.
+        val item = db.itemDao().getById("i1")!!
+        assertEquals("Milk", item.name)
+        assertEquals("Dairy", item.category)
+        assertNull(item.targetPriceCents)
+        assertNull(item.barcode)
+        assertEquals("Groceries", db.listDao().getById("l1")!!.name)
+
+        // New tables exist and are writable via their DAOs.
+        db.productLinkDao().upsert(
+            ProductLinkEntity(id = "lk1", itemId = "i1", store = "Eroski", updatedAt = 1),
+        )
+        db.priceDao().upsert(
+            PriceEntity(id = "p1", linkId = "lk1", priceCents = 199, observedAt = 2, source = "manual"),
+        )
+        assertEquals(1, db.productLinkDao().getByItem("i1").size)
+        assertEquals(199, db.priceDao().getByLink("lk1").first().priceCents)
         db.close()
     }
 }

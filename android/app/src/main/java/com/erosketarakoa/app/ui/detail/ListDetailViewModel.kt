@@ -94,6 +94,53 @@ class ListDetailViewModel @Inject constructor(
         }
     }
 
+    /** Existing store links for an item, store -> reference (blank if none), for editor prefill. */
+    suspend fun linksFor(itemId: String): Map<String, String> =
+        repository.getLinks(itemId).associate { it.store to (it.externalProductId ?: "") }
+
+    /** Create a new item plus its pricing and store links, all through the repository. */
+    fun saveNewItem(form: ItemFormValues) {
+        if (form.name.isBlank()) return
+        viewModelScope.launch {
+            val id = repository.addItem(
+                listId, form.name, form.quantity, form.unit,
+                form.supermarkets, form.category, form.notes, form.icon,
+            )
+            repository.setItemPricing(id, form.targetPriceCents, form.barcode)
+            reconcileLinks(id, form.links)
+        }
+    }
+
+    /** Update an existing item plus pricing and store links. */
+    fun saveExistingItem(id: String, form: ItemFormValues) {
+        if (form.name.isBlank()) return
+        viewModelScope.launch {
+            repository.updateItem(
+                id, form.name, form.quantity, form.unit,
+                form.supermarkets, form.category, form.notes, form.icon,
+            )
+            repository.setItemPricing(id, form.targetPriceCents, form.barcode)
+            reconcileLinks(id, form.links)
+        }
+    }
+
+    /** Make the item's active links match [desired] (store -> reference): add, update, remove by store. */
+    private suspend fun reconcileLinks(itemId: String, desired: Map<String, String>) {
+        val existing = repository.getLinks(itemId).associateBy { it.store }
+        // Remove links whose store is no longer desired.
+        existing.forEach { (store, link) ->
+            if (store !in desired) repository.removeLink(link.id)
+        }
+        desired.forEach { (store, ref) ->
+            val current = existing[store]
+            if (current == null) {
+                repository.addLink(itemId, store, externalProductId = ref)
+            } else if ((current.externalProductId ?: "") != ref) {
+                repository.updateLink(current.id, store, externalProductId = ref)
+            }
+        }
+    }
+
     fun toggleBought(item: ItemEntity) {
         viewModelScope.launch { repository.setBought(item.id, !item.bought) }
     }

@@ -5,6 +5,8 @@ import androidx.room.Room
 import com.erosketarakoa.app.data.local.AppDatabase
 import com.erosketarakoa.app.data.local.ItemDao
 import com.erosketarakoa.app.data.local.ListDao
+import com.erosketarakoa.app.data.local.PriceDao
+import com.erosketarakoa.app.data.local.ProductLinkDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,6 +28,7 @@ object DatabaseModule {
                 AppDatabase.MIGRATION_4_5,
                 AppDatabase.MIGRATION_5_6,
                 AppDatabase.MIGRATION_6_7,
+                AppDatabase.MIGRATION_7_8,
             )
             .build()
 
@@ -34,4 +37,10 @@ object DatabaseModule {
 
     @Provides
     fun provideItemDao(db: AppDatabase): ItemDao = db.itemDao()
+
+    @Provides
+    fun provideProductLinkDao(db: AppDatabase): ProductLinkDao = db.productLinkDao()
+
+    @Provides
+    fun providePriceDao(db: AppDatabase): PriceDao = db.priceDao()
 }

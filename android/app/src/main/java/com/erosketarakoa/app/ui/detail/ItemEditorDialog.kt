@@ -13,6 +13,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,6 +32,9 @@ const val ITEM_NAME_FIELD_TAG = "item_name_field"
 const val ITEM_QTY_FIELD_TAG = "item_qty_field"
 const val ITEM_SAVE_BUTTON_TAG = "item_save_button"
 
+const val ITEM_TARGET_FIELD_TAG = "item_target_field"
+const val ITEM_BARCODE_FIELD_TAG = "item_barcode_field"
+
 data class ItemFormValues(
     val name: String,
     val quantity: Int,
@@ -39,6 +43,14 @@ data class ItemFormValues(
     val category: String?,
     val notes: String?,
     val icon: String,
+    /** Target price in integer cents; null = no target. */
+    val targetPriceCents: Long?,
+    val barcode: String?,
+    /**
+     * Desired store links: store name -> external product reference (may be blank).
+     * A store present here means "link to it"; absent means "no link / remove existing".
+     */
+    val links: Map<String, String>,
 )
 
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
@@ -48,6 +60,8 @@ fun ItemEditorDialog(
     existing: ItemEntity?,
     onConfirm: (ItemFormValues) -> Unit,
     onDismiss: () -> Unit,
+    /** Existing store links for this item, store name -> external product reference. */
+    existingLinks: Map<String, String> = emptyMap(),
 ) {
     var name by remember { mutableStateOf(existing?.name ?: "") }
     var quantity by remember { mutableStateOf((existing?.quantity ?: 1).toString()) }
@@ -58,6 +72,12 @@ fun ItemEditorDialog(
     var category by remember { mutableStateOf(existing?.category ?: "") }
     var notes by remember { mutableStateOf(existing?.notes ?: "") }
     var icon by remember { mutableStateOf(existing?.icon ?: DEFAULT_ICON) }
+    var target by remember { mutableStateOf(com.erosketarakoa.app.data.Money.centsToEuros(existing?.targetPriceCents)) }
+    var barcode by remember { mutableStateOf(existing?.barcode ?: "") }
+    // Store -> external product reference. Selecting a store below adds it here.
+    val linkRefs = remember {
+        mutableStateMapOf<String, String>().apply { putAll(existingLinks) }
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -112,6 +132,52 @@ fun ItemEditorDialog(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = target,
+                        onValueChange = { new -> target = new.filter { it.isDigit() || it == '.' || it == ',' }.take(10) },
+                        label = { Text("Target price (€)") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        modifier = Modifier
+                            .weight(1f)
+                            .testTag(ITEM_TARGET_FIELD_TAG),
+                    )
+                    OutlinedTextField(
+                        value = barcode,
+                        onValueChange = { barcode = it.filter { c -> c.isLetterOrDigit() } },
+                        label = { Text("Barcode / EAN") },
+                        singleLine = true,
+                        modifier = Modifier
+                            .weight(1f)
+                            .testTag(ITEM_BARCODE_FIELD_TAG),
+                    )
+                }
+                Text("Store links")
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    SUPERMARKET_OPTIONS.forEach { store ->
+                        val linked = store in linkRefs
+                        FilterChip(
+                            selected = linked,
+                            onClick = {
+                                if (linked) linkRefs.remove(store) else linkRefs[store] = ""
+                            },
+                            label = { Text(store) },
+                        )
+                    }
+                }
+                // A reference field per linked store.
+                linkRefs.keys.sorted().forEach { store ->
+                    OutlinedTextField(
+                        value = linkRefs[store] ?: "",
+                        onValueChange = { linkRefs[store] = it },
+                        label = { Text("$store product reference") },
+                        singleLine = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("item_link_ref_$store"),
+                    )
+                }
                 OutlinedTextField(
                     value = notes,
                     onValueChange = { notes = it },
@@ -142,6 +208,9 @@ fun ItemEditorDialog(
                             category = category.ifBlank { null },
                             notes = notes.ifBlank { null },
                             icon = icon,
+                            targetPriceCents = com.erosketarakoa.app.data.Money.parseEurosToCents(target),
+                            barcode = barcode.ifBlank { null },
+                            links = linkRefs.toMap(),
                         ),
                     )
                 },

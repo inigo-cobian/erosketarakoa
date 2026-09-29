@@ -21,7 +21,10 @@ class ListsViewModelTest {
 
     private val listDao = FakeListDao()
     private val itemDao = FakeItemDao()
-    private val repository = ShoppingRepository(listDao, itemDao, FakeClock())
+    private val linkDao = com.erosketarakoa.app.fakes.FakeProductLinkDao()
+    private val priceDao = com.erosketarakoa.app.fakes.FakePriceDao(linkDao)
+    private val remote = com.erosketarakoa.app.fakes.fakeRemoteDataSource()
+    private val repository = ShoppingRepository(listDao, itemDao, linkDao, priceDao, remote, FakeClock())
 
     // Built lazily so the ViewModel (and its viewModelScope) is created after the rule has
     // installed the test main dispatcher.

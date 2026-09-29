@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.erosketarakoa.app.notification.BargainNotifier
 import com.erosketarakoa.app.ui.navigation.AppNavigation
 import com.erosketarakoa.app.ui.settings.ThemeViewModel
 import com.erosketarakoa.app.ui.theme.ErosketarakoTheme
@@ -25,6 +26,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val openBargains = intent?.dataString == BargainNotifier.DEEP_LINK
         setContent {
             val themeViewModel: ThemeViewModel = hiltViewModel()
             val themeMode by themeViewModel.themeMode.collectAsStateWithLifecycle()
@@ -41,7 +43,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background,
                     ) {
-                        RootContent()
+                        RootContent(openBargains = openBargains)
                     }
                 }
             }
@@ -50,6 +52,6 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun RootContent() {
-    AppNavigation()
+private fun RootContent(openBargains: Boolean) {
+    AppNavigation(openBargains = openBargains)
 }

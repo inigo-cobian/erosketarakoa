@@ -23,6 +23,10 @@ data class ItemEntity(
     /** Selected supermarkets, comma-joined (e.g. "Eroski,Lidl"). Empty = none. */
     val supermarkets: String = "",
     val category: String? = null,
+    /** Per-item target price in integer cents; null = no target. */
+    val targetPriceCents: Long? = null,
+    /** Barcode / EAN for backend matching; null = none. */
+    val barcode: String? = null,
     val notes: String? = null,
     val bought: Boolean = false,
     /** OpenMoji hexcode (filename stem), e.g. "1F345". Required; defaults to amphora. */

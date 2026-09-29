@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -70,6 +71,7 @@ const val ADD_LIST_FAB_TAG = "add_list_fab"
 const val LIST_NAME_FIELD_TAG = "list_name_field"
 const val ABOUT_ACTION_TAG = "about_action"
 const val SETTINGS_ACTION_TAG = "settings_action"
+const val BARGAINS_ACTION_TAG = "bargains_action"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,6 +79,7 @@ fun ListsScreen(
     onOpenList: (String) -> Unit,
     onOpenAbout: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
+    onOpenBargains: () -> Unit = {},
     viewModel: ListsViewModel = hiltViewModel(),
     themeViewModel: ThemeViewModel = hiltViewModel(),
 ) {
@@ -102,6 +105,9 @@ fun ListsScreen(
                     )
                 },
                 actions = {
+                    IconButton(onClick = onOpenBargains, modifier = Modifier.testTag(BARGAINS_ACTION_TAG)) {
+                        Icon(Icons.Default.ShoppingCart, contentDescription = "Today's bargains")
+                    }
                     IconButton(onClick = onOpenAbout, modifier = Modifier.testTag(ABOUT_ACTION_TAG)) {
                         Icon(Icons.Default.Info, contentDescription = "About")
                     }
