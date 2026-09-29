@@ -1,0 +1,38 @@
+{
+  "items": [
+    {
+      "id": 330442,
+      "product_code": "3017620422003",
+      "product_name": "400G NUTELLA",
+      "product": {"product_name": "Nutella"},
+      "price": 4.68,
+      "currency": "EUR",
+      "created": "2026-09-13T10:54:52.063963Z",
+      "location": {"osm_name": "Carrefour Express", "osm_brand": "Carrefour Express"}
+    },
+    {
+      "id": 325444,
+      "product_code": "3017620422003",
+      "product_name": null,
+      "product": {"product_name": "Nutella"},
+      "price": 3.65,
+      "currency": "EUR",
+      "created": "2026-09-04T16:20:39.992089Z",
+      "location": {"osm_name": "Carrefour Market", "osm_brand": "Carrefour Market"}
+    },
+    {
+      "id": 999001,
+      "product_code": "3017620422003",
+      "product_name": "NO PRICE ROW",
+      "product": {"product_name": "Nutella"},
+      "price": null,
+      "currency": "EUR",
+      "created": "2026-09-01T00:00:00Z",
+      "location": {"osm_name": "Somewhere"}
+    }
+  ],
+  "page": 1,
+  "pages": 17,
+  "size": 10,
+  "total": 166
+}

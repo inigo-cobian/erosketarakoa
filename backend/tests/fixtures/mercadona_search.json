@@ -1,0 +1,22 @@
+{
+  "products": [
+    {
+      "id": "12345",
+      "name": "Leche entera Hacendado 1 L",
+      "ean": "8480000123456",
+      "price": 0.89,
+      "currency": "EUR"
+    },
+    {
+      "id": "67890",
+      "display_name": "Aceite de oliva virgen extra 1 L",
+      "price_cents": 799,
+      "currency": "EUR"
+    },
+    {
+      "id": "00000",
+      "name": "Sin precio",
+      "price": null
+    }
+  ]
+}
